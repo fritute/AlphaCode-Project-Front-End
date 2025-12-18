@@ -9,18 +9,31 @@ import { RouterOutlet } from '@angular/router';
   template: `
     <div class="app-container">
       <header class="app-header">
-        <h1>{{ title }}</h1>
+        <img class="img_logo" src="./assets/logo_alphacode.png" alt="">
+        <h1 class="titulo">{{ title }}</h1>
       </header>
       <main class="app-main">
         <router-outlet></router-outlet>
       </main>
-      <footer class="app-footer">
-        <p>&copy; 2024 AlphaCode Frontend</p>
+           <footer class="page-footer">
+        <div class="footer-content">
+          <div class="footer-left">
+            <span>Termos | Políticas</span>
+          </div>
+          <div class="footer-center">
+            <span>© Copyright 2022 | Desenvolvido por</span>
+            <img src="assets/logo_alphacode.png" alt="AlphaCode" class="footer-logo">
+          </div>
+          <div class="footer-right">
+            <span>#Alphacode IT Solutions 2022</span>
+          </div>
+        </div>
       </footer>
     </div>
+    
   `,
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  title = 'Frontend Angular - AlphaCode';
+  title = 'Cadastro de Contatos';
 }

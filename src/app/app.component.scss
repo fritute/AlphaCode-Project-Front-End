@@ -5,11 +5,15 @@
 }
 
 .app-header {
-  background-color: #1976d2;
+  background-color: #048cd4;
   color: white;
   padding: 1rem;
-  text-align: center;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 2rem;
 
   h1 {
     margin: 0;
@@ -22,14 +26,65 @@
   padding: 2rem;
 }
 
-.app-footer {
-  background-color: #f5f5f5;
-  padding: 1rem;
-  text-align: center;
-  border-top: 1px solid #e0e0e0;
+// Footer
+.page-footer {
+  background-color: #048cd4;
+  color: white;
+  padding: 1.5rem 0;
+  margin-top: 4rem;
+  position: relative;
+  bottom: 0;
+  width: 100%;
+}
 
-  p {
-    margin: 0;
-    color: #666;
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  font-size: 0.85rem;
+
+  .footer-left {
+    color: white;
+    
+    span {
+      text-decoration: underline;
+      cursor: pointer;
+    }
   }
+
+  .footer-center {
+    display: flex;
+    align-items: center;
+    color: white;
+    
+    .footer-logo {
+      height: 24px;
+      width: auto;
+      margin: 0 0.5rem;
+      filter: brightness(0) invert(1);
+    }
+  }
+
+  .footer-right {
+    color: white;
+    font-weight: 500;
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+}
+
+.img_logo {
+  width: 150px;
+  height: auto;
+}
+.titulo {
+  margin: 0;
+  font-size: xx-large;
 }
