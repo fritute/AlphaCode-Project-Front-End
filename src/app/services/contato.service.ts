@@ -22,8 +22,28 @@ export class ContatoService {
 
   constructor(private http: HttpClient) {}
 
-  // Listar todos os contatos - GET simples
+  // Listar todos os contatos
   listarContatos(): Observable<any> {
     return this.http.get<any>(this.apiUrl);
+  }
+
+  // Criar novo contato
+  criarContato(contato: Partial<ContatoAPI>): Observable<any> {
+    return this.http.post<any>(this.apiUrl, contato);
+  }
+
+  // Buscar contato por ID
+  buscarContato(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
+  }
+
+  // Atualizar contato
+  atualizarContato(id: number, contato: Partial<ContatoAPI>): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/${id}`, contato);
+  }
+
+  // Excluir contato
+  excluirContato(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/${id}`);
   }
 }
