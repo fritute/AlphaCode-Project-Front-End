@@ -131,6 +131,7 @@ export interface Contato {
                 maxlength="15"
                 [(ngModel)]="celularFormatado"
                 (input)="formatarCelularInput($event)"
+                (keypress)="validarDigitacaoCelular($event)"
                 #celularField="ngModel"
                 required>
               <div *ngIf="celularField.invalid && celularField.touched" class="error-text">
@@ -688,9 +689,19 @@ export class HomeComponent implements OnInit {
 
   formatarCelularInput(event: any) {
     const valor = event.target.value;
-    this.celularFormatado = this.formatacaoService.aplicarMascaraCelular(valor);
-    // Atualiza o modelo com apenas números para validação
-    this.contato.celular_contato = this.formatacaoService.limparFormatacaoTelefone(valor);
+    const apenasNumeros = valor.replace(/\D/g, '');
+    
+    // Limita exatamente a 11 dígitos
+    if (apenasNumeros.length > 11) {
+      const valorLimitado = apenasNumeros.substring(0, 11);
+      this.celularFormatado = this.formatacaoService.aplicarMascaraCelular(valorLimitado);
+      this.contato.celular_contato = valorLimitado;
+      // Força a atualização do valor do input
+      event.target.value = this.celularFormatado;
+    } else {
+      this.celularFormatado = this.formatacaoService.aplicarMascaraCelular(valor);
+      this.contato.celular_contato = apenasNumeros;
+    }
   }
 
   validarDigitacaoTelefone(event: KeyboardEvent) {
@@ -699,6 +710,21 @@ export class HomeComponent implements OnInit {
     
     // Se já tem 10 dígitos e não é uma tecla de controle (backspace, delete, etc)
     if (apenasNumeros.length >= 10 && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(event.key)) {
+      event.preventDefault();
+    }
+    
+    // Permite apenas números
+    if (!/[0-9]/.test(event.key) && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(event.key)) {
+      event.preventDefault();
+    }
+  }
+
+  validarDigitacaoCelular(event: KeyboardEvent) {
+    const valorAtual = (event.target as HTMLInputElement).value;
+    const apenasNumeros = valorAtual.replace(/\D/g, '');
+    
+    // Se já tem 11 dígitos e não é uma tecla de controle (backspace, delete, etc)
+    if (apenasNumeros.length >= 11 && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(event.key)) {
       event.preventDefault();
     }
     
