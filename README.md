@@ -110,11 +110,11 @@ Para o funcionamento completo da aplicação, é necessário ter um backend PHP 
 
 4. **Execute o projeto**
    ```bash
-   npm start ou 
+   npm start ou ng serve
    ```
 
 5. **Acesse a aplicação**
-   - Aplicação: `http://localhost:4201`
+   - Aplicação: `http://localhost:4200`
    - API Backend: `http://localhost:8000/api/contatos`
 
 ## 📝 Scripts Disponíveis
