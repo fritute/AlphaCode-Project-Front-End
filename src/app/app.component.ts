@@ -22,7 +22,7 @@ import { RouterOutlet } from '@angular/router';
           </div>
           <div class="footer-center">
             <span>© Copyright 2022 | Desenvolvido por</span>
-            <img src="assets/logo_alphacode.png" alt="AlphaCode" class="footer-logo">
+            <img src="assets/logo_rodape_alphacode.png" alt="AlphaCode" class="footer-logo">
           </div>
           <div class="footer-right">
             <span>#Alphacode IT Solutions 2022</span>

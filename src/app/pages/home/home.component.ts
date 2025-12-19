@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ContatoService, ContatoAPI } from '../../services/contato.service';
+import { FormatacaoService } from '../../services/formatacao.service';
 
 export interface Contato {
   nome: string;
@@ -41,30 +42,24 @@ export interface Contato {
                 [(ngModel)]="contato.nome"
                 #nomeField="ngModel"
                 minlength="2"
-                pattern="[a-zA-ZÀ-ÿ\s]+"
                 required>
               <div *ngIf="nomeField.invalid && nomeField.touched" class="error-text">
                 <small *ngIf="nomeField.errors?.['required']" style="color: #dc3545;">Nome é obrigatório</small>
                 <small *ngIf="nomeField.errors?.['minlength']" style="color: #dc3545;">Nome deve ter pelo menos 2 caracteres</small>
-                <small *ngIf="nomeField.errors?.['pattern']" style="color: #dc3545;">Nome deve conter apenas letras</small>
               </div>
             </div>
             <div class="form-field">
               <label for="data_nascimento">Data de nascimento</label>
               <input 
-                type="text" 
+                type="date" 
                 id="data_nascimento" 
                 name="data_nascimento"
-                placeholder="Ex.: 15/03/1990 ou use o calendário"
-                onfocus="(this.type='date')"
-                onblur="(this.type='text')"
+                placeholder="Selecione a data de nascimento"
                 [(ngModel)]="contato.data_nascimento"
                 #dataNascimento="ngModel"
-                pattern="\d{4}-\d{2}-\d{2}"
                 required>
               <div *ngIf="dataNascimento.invalid && dataNascimento.touched" class="error-text">
                 <small *ngIf="dataNascimento.errors?.['required']" style="color: #dc3545;">Data de nascimento é obrigatória</small>
-                <small *ngIf="dataNascimento.errors?.['pattern']" style="color: #dc3545;">Formato de data inválido</small>
               </div>
             </div>
           </div>
@@ -113,16 +108,16 @@ export interface Contato {
                 type="tel" 
                 id="telefone_contato" 
                 name="telefone_contato"
-                placeholder="Ex.: 40332019"
-                maxlength="8"
-                minlength="8"
-                pattern="[0-9]{8}"
-                [(ngModel)]="contato.telefone_contato"
+                placeholder="Ex.: (11) 4003-2019"
+                maxlength="15"
+                [(ngModel)]="telefoneFormatado"
+                (input)="formatarTelefoneInput($event)"
+                (keypress)="validarDigitacaoTelefone($event)"
                 #telefoneField="ngModel"
                 required>
               <div *ngIf="telefoneField.invalid && telefoneField.touched" class="error-text">
                 <small *ngIf="telefoneField.errors?.['required']" style="color: #dc3545;">Telefone é obrigatório</small>
-                <small *ngIf="telefoneField.errors?.['pattern'] || telefoneField.errors?.['minlength']" style="color: #dc3545;">Telefone deve ter 8 dígitos</small>
+                <small *ngIf="telefoneField.errors?.['pattern'] || telefoneField.errors?.['minlength']" style="color: #dc3545;">Telefone deve ter 10 dígitos (DDD + número)</small>
               </div>
             </div>
             
@@ -132,11 +127,10 @@ export interface Contato {
                 type="tel" 
                 id="celular_contato" 
                 name="celular_contato"
-                placeholder="Ex.: 11984932039"
-                maxlength="11"
-                minlength="11"
-                pattern="[0-9]{11}"
-                [(ngModel)]="contato.celular_contato"
+                placeholder="Ex.: (11)98493-2039"
+                maxlength="15"
+                [(ngModel)]="celularFormatado"
+                (input)="formatarCelularInput($event)"
                 #celularField="ngModel"
                 required>
               <div *ngIf="celularField.invalid && celularField.touched" class="error-text">
@@ -179,6 +173,11 @@ export interface Contato {
           <!-- Mensagem de erro -->
           <div class="error-message" *ngIf="erro">
             {{ erro }}
+          </div>
+
+          <!-- Mensagem de sucesso -->
+          <div class="success-message" *ngIf="mensagemSucesso" style="color: #28a745; margin: 10px 0; padding: 10px; background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px;">
+            {{ mensagemSucesso }}
           </div>
 
           <!-- Botões de ação -->
@@ -254,7 +253,6 @@ export interface Contato {
       <div *ngIf="!loading && contatosFiltrados.length > 0">
       <table border="1" style="width: 100%; margin: 20px 0;">
         <tr style="background: #048cd4; color: white;">
-          <th style="padding: 10px;">ID</th>
           <th style="padding: 10px;">Nome</th>
           <th style="padding: 10px;">Email</th>
           <th style="padding: 10px;">Data Nascimento</th>
@@ -264,13 +262,12 @@ export interface Contato {
           <th style="padding: 10px;">Ações</th>
         </tr>
         <tr *ngFor="let c of contatosPaginados; trackBy: trackContatoById" style="background: white;">
-          <td style="padding: 10px; border: 1px solid #ccc; text-align: center;">{{ c.id }}</td>
           <td style="padding: 10px; border: 1px solid #ccc; font-weight: bold;">{{ c.nome }}</td>
           <td style="padding: 10px; border: 1px solid #ccc;">{{ c.email }}</td>
           <td style="padding: 10px; border: 1px solid #ccc; text-align: center;">{{ formatarData(c.data_nascimento) }}</td>
           <td style="padding: 10px; border: 1px solid #ccc;">{{ c.profissao }}</td>
-          <td style="padding: 10px; border: 1px solid #ccc; text-align: center;">{{ c.telefone_contato }}</td>
-          <td style="padding: 10px; border: 1px solid #ccc; text-align: center;">{{ c.celular_contato }}</td>
+          <td style="padding: 10px; border: 1px solid #ccc; text-align: center;">{{ formatarTelefoneExibicao(c.telefone_contato) }}</td>
+          <td style="padding: 10px; border: 1px solid #ccc; text-align: center;">{{ formatarCelularExibicao(c.celular_contato) }}</td>
           <td style="padding: 10px; border: 1px solid #ccc; text-align: center;">
             <button 
               (click)="editarContato(c)" 
@@ -374,7 +371,17 @@ export class HomeComponent implements OnInit {
   filtroProfissao = '';
   filtroAnoNascimento = '';
 
-  constructor(private contatoService: ContatoService) { }
+  // Campos formatados para exibição
+  telefoneFormatado = '';
+  celularFormatado = '';
+
+  // Mensagem de sucesso
+  mensagemSucesso = '';
+
+  constructor(
+    private contatoService: ContatoService,
+    private formatacaoService: FormatacaoService
+  ) { }
 
   ngOnInit() {
     this.carregarContatos();
@@ -384,18 +391,12 @@ export class HomeComponent implements OnInit {
     this.loading = true;
     this.erro = '';
     
-    console.log('🔄 Carregando contatos da API...');
-    
     this.contatoService.listarContatos().subscribe({
       next: (response) => {
-        console.log('📥 Resposta da API:', response);
-        
         if (response && response.data && response.data.contatos) {
           this.contatos = response.data.contatos;
           this.aplicarFiltros();
-          console.log('✅ Contatos carregados:', this.contatos);
         } else {
-          console.log('⚠️ Estrutura de resposta inesperada:', response);
           this.contatos = [];
           this.contatosFiltrados = [];
         }
@@ -403,7 +404,6 @@ export class HomeComponent implements OnInit {
         this.loading = false;
       },
       error: (error) => {
-        console.error('❌ Erro ao carregar contatos:', error);
         this.loading = false;
         this.erro = 'Erro ao carregar contatos: ' + (error.message || error);
       }
@@ -429,14 +429,37 @@ export class HomeComponent implements OnInit {
     
     operacao.subscribe({
       next: (response) => {
-        console.log('✅ Contato salvo:', response);
+        // Limpar erro e exibir mensagem de sucesso
+        this.erro = '';
+        this.mensagemSucesso = this.editandoId ? 
+          'Contato atualizado com sucesso!' : 
+          'Contato cadastrado com sucesso!';
+        
+        // Limpar mensagem após 5 segundos
+        setTimeout(() => {
+          this.mensagemSucesso = '';
+        }, 5000);
+        
         this.resetForm();
         this.carregarContatos();
         this.loading = false;
       },
       error: (error) => {
-        console.error('❌ Erro ao salvar contato:', error);
-        this.erro = 'Erro ao salvar contato: ' + (error.error?.message || error.message || 'Erro desconhecido');
+        let mensagemErro = 'Erro ao salvar contato: ';
+        
+        if (error.status === 422) {
+          if (error.error?.errors) {
+            // Laravel validation errors
+            const erros = Object.values(error.error.errors).flat();
+            mensagemErro += erros.join(', ');
+          } else {
+            mensagemErro += error.error?.message || 'Dados inválidos';
+          }
+        } else {
+          mensagemErro += error.error?.message || error.message || 'Erro desconhecido';
+        }
+        
+        this.erro = mensagemErro;
         this.loading = false;
       }
     });
@@ -459,11 +482,11 @@ export class HomeComponent implements OnInit {
     }
 
     // Validar telefone
-    const telefoneRegex = /^[0-9]{8}$/;
+    const telefoneRegex = /^[0-9]{10}$/;
     if (!this.contato.telefone_contato) {
       erros.push('Telefone é obrigatório');
     } else if (!telefoneRegex.test(this.contato.telefone_contato)) {
-      erros.push('Telefone deve ter exatamente 8 dígitos');
+      erros.push('Telefone deve ter exatamente 10 dígitos (DDD + número)');
     }
 
     // Validar celular
@@ -482,6 +505,18 @@ export class HomeComponent implements OnInit {
     // Validar data de nascimento
     if (!this.contato.data_nascimento) {
       erros.push('Data de nascimento é obrigatória');
+    } else {
+      // Verificar se a data é válida (não pode ser futura)
+      const dataInserida = new Date(this.contato.data_nascimento);
+      const hoje = new Date();
+      if (dataInserida > hoje) {
+        erros.push('Data de nascimento não pode ser futura');
+      }
+      // Verificar se a data não é muito antiga (antes de 1900)
+      const dataMinima = new Date('1900-01-01');
+      if (dataInserida < dataMinima) {
+        erros.push('Data de nascimento deve ser posterior a 1900');
+      }
     }
 
     return erros;
@@ -494,12 +529,10 @@ export class HomeComponent implements OnInit {
       
       this.contatoService.excluirContato(id).subscribe({
         next: (response) => {
-          console.log('✅ Contato excluído:', response);
           this.carregarContatos();
           this.loading = false;
         },
         error: (error) => {
-          console.error('❌ Erro ao excluir contato:', error);
           this.erro = 'Erro ao excluir contato: ' + (error.error?.message || error.message || 'Erro desconhecido');
           this.loading = false;
         }
@@ -525,7 +558,10 @@ export class HomeComponent implements OnInit {
       notificacaoEmail: false,
       notificacaoSMS: false
     };
+    this.telefoneFormatado = '';
+    this.celularFormatado = '';
     this.erro = '';
+    // NÃO limpar mensagemSucesso aqui para que ela apareça
   }
 
   formatarData(data: string): string {
@@ -553,6 +589,15 @@ export class HomeComponent implements OnInit {
       notificacaoEmail: false,
       notificacaoSMS: false
     };
+    
+    // Sincronizar campos formatados
+    this.telefoneFormatado = this.formatacaoService.aplicarMascaraTelefoneFixo(contato.telefone_contato);
+    this.celularFormatado = this.formatacaoService.aplicarMascaraCelular(contato.celular_contato);
+    
+    // Rolar para o topo do formulário
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 100);
   }
 
   // Métodos de filtros
@@ -612,6 +657,54 @@ export class HomeComponent implements OnInit {
   irParaPagina(pagina: number) {
     if (pagina >= 1 && pagina <= this.totalPaginas) {
       this.paginaAtual = pagina;
+    }
+  }
+
+  // Métodos de formatação de telefone
+  formatarTelefoneExibicao(telefone: string): string {
+    return this.formatacaoService.formatarTelefoneFixo(telefone);
+  }
+
+  formatarCelularExibicao(celular: string): string {
+    return this.formatacaoService.formatarCelular(celular);
+  }
+
+  formatarTelefoneInput(event: any) {
+    const valor = event.target.value;
+    const apenasNumeros = valor.replace(/\D/g, '');
+    
+    // Limita exatamente a 10 dígitos
+    if (apenasNumeros.length > 10) {
+      const valorLimitado = apenasNumeros.substring(0, 10);
+      this.telefoneFormatado = this.formatacaoService.aplicarMascaraTelefoneFixo(valorLimitado);
+      this.contato.telefone_contato = valorLimitado;
+      // Força a atualização do valor do input
+      event.target.value = this.telefoneFormatado;
+    } else {
+      this.telefoneFormatado = this.formatacaoService.aplicarMascaraTelefoneFixo(valor);
+      this.contato.telefone_contato = apenasNumeros;
+    }
+  }
+
+  formatarCelularInput(event: any) {
+    const valor = event.target.value;
+    this.celularFormatado = this.formatacaoService.aplicarMascaraCelular(valor);
+    // Atualiza o modelo com apenas números para validação
+    this.contato.celular_contato = this.formatacaoService.limparFormatacaoTelefone(valor);
+  }
+
+  validarDigitacaoTelefone(event: KeyboardEvent) {
+    const valorAtual = (event.target as HTMLInputElement).value;
+    const apenasNumeros = valorAtual.replace(/\D/g, '');
+    
+    // Se já tem 10 dígitos e não é uma tecla de controle (backspace, delete, etc)
+    if (apenasNumeros.length >= 10 && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(event.key)) {
+      event.preventDefault();
+    }
+    
+    // Permite apenas números
+    if (!/[0-9]/.test(event.key) && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(event.key)) {
+      event.preventDefault();
     }
   }
 

@@ -110,7 +110,7 @@ Para o funcionamento completo da aplicação, é necessário ter um backend PHP 
 
 4. **Execute o projeto**
    ```bash
-   npm start
+   npm start ou 
    ```
 
 5. **Acesse a aplicação**
@@ -228,10 +228,6 @@ Os arquivos de produção serão criados no diretório `dist/`.
 - Otimize as imagens em `assets/`
 - Configure HTTPS se necessário
 
-## 👥 Equipe de Desenvolvimento
-
-- **AlphaCode** - *Desenvolvimento Frontend*
-- **Gustavo** - *Integração e Testes*
 
 ## 📞 Suporte Técnico
 

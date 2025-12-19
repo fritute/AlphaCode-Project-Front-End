@@ -59,7 +59,8 @@ label {
 
 input[type="text"], 
 input[type="email"], 
-input[type="tel"] {
+input[type="tel"],
+input[type="date"] {
   padding: 0.75rem 0;
   border: none;
   border-bottom: 2px solid #ddd;
@@ -77,6 +78,26 @@ input[type="tel"] {
   &::placeholder {
     color: #999;
     font-style: italic;
+  }
+
+  // Estilização específica para input date
+  &[type="date"] {
+    color: #333;
+    
+    // Customizar o ícone do calendário
+    &::-webkit-calendar-picker-indicator {
+      background-color: #048cd4;
+      border-radius: 2px;
+      cursor: pointer;
+      padding: 2px;
+    }
+    
+    // Remover spinner nos browsers webkit
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
   }
 }
 
